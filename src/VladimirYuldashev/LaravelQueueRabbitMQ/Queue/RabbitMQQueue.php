@@ -25,7 +25,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 * @param AMQPConnection $amqpConnection
 	 * @param array          $config
 	 */
-	public function __construct(AMQPConnection $amqpConnection, $config)
+	public function __construct($amqpConnection, $config)
 	{
 		$this->connection = $amqpConnection;
 		$this->defaultQueue = $config['queue'];
