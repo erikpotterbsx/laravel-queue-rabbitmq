@@ -28,6 +28,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	public function __construct($amqpConnection, $config)
 	{
 		$this->connection = $amqpConnection;
+                $this->config = $config;
 		$this->defaultQueue = $config['queue'];
 		$this->configQueue = $config['queue_params'];
 		$this->configExchange = $config['exchange_params'];
@@ -76,7 +77,11 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	public function pushRaw($payload, $queue = null, array $options = [])
 	{
 		$queue = $this->getQueueName($queue);
-		$this->declareQueue($queue);
+
+		if ($this->config['exchange_declare']){
+                    $this->declareQueue($queue);
+                }
+
 		if (isset($options['delay']))
 		{
 			$queue = $this->declareDelayedQueue($queue, $options['delay']);
@@ -89,7 +94,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		]);
 
 		// push task to a queue
-		$this->channel->basic_publish($message, $queue, $queue);
+		$this->channel->basic_publish($message, $this->configExchange['name'], $queue);
 
 		return true;
 	}
