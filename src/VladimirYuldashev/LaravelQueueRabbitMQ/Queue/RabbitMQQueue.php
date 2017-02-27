@@ -47,7 +47,15 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 */
 	public function push($job, $data = '', $queue = null)
 	{
-		return $this->pushRaw($this->createPayload($job, $data), $queue, []);
+            return $this->pushRaw(
+                //$this->createPayload($job, $data),
+                json_encode($data),
+                $queue,
+                [
+                    'id'   => $data[1]['id'],
+                    'task' => $job,
+                ]
+            );
 	}
 
 	/**
@@ -92,6 +100,13 @@ class RabbitMQQueue extends Queue implements QueueInterface
 			'content_type'  => 'application/json',
 			'delivery_mode' => 2,
 		]);
+
+                $headers = new AMQPTable([
+                    'id'   => $options['id'],
+                    'task' => $options['task'],
+                ]);
+
+                $message->set('application_headers', $headers);
 
 		// push task to a queue
 		$this->channel->basic_publish($message, $this->configExchange['name'], $queue);
